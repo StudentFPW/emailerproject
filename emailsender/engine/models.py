@@ -4,4 +4,4 @@ from ckeditor.fields import RichTextField
 
 class Sender(models.Model):
     content = RichTextField()
-    emails = models.FileField(upload_to='emails_base/')
+    emails = models.FileField(upload_to='emails_base/%Y/%m/%d/')
