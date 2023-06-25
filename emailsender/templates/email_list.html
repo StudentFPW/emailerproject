@@ -1,0 +1,15 @@
+{% extends 'index.html' %}
+
+{% block title %}
+    Email messages
+{% endblock title %}
+
+{% block content %}
+    <br>
+    {% for data in email_list %}
+        <h2>{{ data.title }}</h2>
+        {{ data.content | safe }}
+        {{ data.datetime }}
+        <hr>
+    {% endfor %}
+{% endblock content %}
