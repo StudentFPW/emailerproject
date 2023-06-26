@@ -1,9 +1,12 @@
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView
 from .models import *
 
 
-class CreateMessage(CreateView):
+class CreateMessage(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    raise_exception = True
+    permission_required = 'engine.change_sender'
     model = Sender
     template_name = 'email_create.html'
     fields = ['title', 'content', 'emails']
