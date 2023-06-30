@@ -6,7 +6,7 @@ from .models import *
 
 class CreateMessage(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     raise_exception = True
-    permission_required = 'engine.change_sender'
+    permission_required = 'engine.add_sender'
     model = Sender
     template_name = 'email_create.html'
     fields = ['title', 'content', 'emails']

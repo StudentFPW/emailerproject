@@ -5,10 +5,11 @@
 {% endblock title %}
 
 {% block content %}
+    <br>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.media }}
         {{ form.as_p }}
-        <input type="submit" value="Save"/>
+        <input type="submit" value="Send"/>
     </form>
 {% endblock content %}
