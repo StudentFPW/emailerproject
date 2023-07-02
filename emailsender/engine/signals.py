@@ -1,7 +1,9 @@
-from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives, mail_admins
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from emailsender.settings import MEDIA_URL
 
 from .models import Sender
 
@@ -11,32 +13,30 @@ def message_created(instance, created, **kwargs):  # FIXME
     if not created:
         return
 
-    emails = []
+    emails_to_send = list()
 
-    for email in User.objects.all().values():
-        emails.append(email["email"])
+    # Here we take variable data from settings
+    direct_to_file = MEDIA_URL[1:] + Sender.objects.all().values().last()["emails"]
 
-    # user_id = User.objects.all().values().last()["feedback_user_id"]
-    #
-    # email = [User.objects.filter(id=user_id).values("email").last()["email"]]
-    #
-    # subject = f'Comment successfully posted in {instance.feedback_post.header} post'
-    #
-    # text_content = (
-    #     f'Feedback on : {instance.feedback_post.header} post\n'
-    #     f'Link: http://127.0.0.1:8000{instance.feedback_post.get_post_url()}'
-    # )
-    # html_content = (
-    #     f'Feedback on : {instance.feedback_post.header} post\n'
-    #     f'Link: http://127.0.0.1:8000{instance.feedback_post.get_post_url()}'
-    # )
-    #
-    # mail_admins(
-    #     subject='',
-    #     message=f'New comment in {instance.feedback_post.header} post',
-    # )
-    #
-    # for _email in email:
-    #     msg = EmailMultiAlternatives(subject, text_content, None, [_email])
-    #     msg.attach_alternative(html_content, "text/html")
-    #     msg.send()
+    # Collecting emails from the last message in the sender model and removing the "\n" character
+    with open(direct_to_file, encoding="utf-8") as emails:
+        for email in emails:
+            emails_to_send.append(email.replace("\n", ""))
+
+    subject = instance.title
+
+    html_template = 'emailsender/templates/html_template.html'
+    html_content = render_to_string(html_template, {'context': instance.content, 'subject': subject})
+
+    text_content = strip_tags(html_content)
+
+    # Sending letters to the destination
+    for _email in emails_to_send:
+        msg = EmailMultiAlternatives(subject, text_content, None, [_email])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+
+    mail_admins(
+        subject=subject,
+        message='Successful message sending',
+    )
