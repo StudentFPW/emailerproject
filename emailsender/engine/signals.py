@@ -9,7 +9,7 @@ from .models import Sender
 
 
 @receiver(post_save, sender=Sender)
-def message_created(instance, created, **kwargs):  # FIXME
+def message_created(instance, created, **kwargs):
     if not created:
         return
 
@@ -20,14 +20,13 @@ def message_created(instance, created, **kwargs):  # FIXME
 
     # Collecting emails from the last message in the sender model and removing the "\n" character
     with open(direct_to_file, encoding="utf-8") as emails:
-        for email in emails:
+        for email in emails.readlines():
             emails_to_send.append(email.replace("\n", ""))
 
+    # Letter Template
     subject = instance.title
-
-    html_template = 'emailsender/templates/html_template.html'
+    html_template = 'html_template.html'
     html_content = render_to_string(html_template, {'context': instance.content, 'subject': subject})
-
     text_content = strip_tags(html_content)
 
     # Sending letters to the destination
@@ -37,6 +36,6 @@ def message_created(instance, created, **kwargs):  # FIXME
         msg.send()
 
     mail_admins(
-        subject=subject,
-        message='Successful message sending',
+        subject="",
+        message='Successful message sending !',
     )
